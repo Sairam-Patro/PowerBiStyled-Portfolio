@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sairam Patro — Portfolio Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════
+   RESET & ROOT
+═══════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  /* Power BI palette */
+  --pbi-bg:#f3f2f1;
+  --pbi-panel:#ffffff;
+  --pbi-header:#252423;
+  --pbi-nav:#3b3a39;
+  --pbi-accent:#f2c811;
+  --pbi-blue:#0078d4;
+  --pbi-orange:#e07b00;
+  --pbi-green:#107c10;
+  --pbi-red:#d13438;
+  --pbi-purple:#5c2d91;
+  --pbi-teal:#008272;
+  --pbi-border:#e1dfdd;
+  --pbi-text:#323130;
+  --pbi-muted:#605e5c;
+  --pbi-light:#f9f8f7;
+  /* Excel palette */
+  --xl-green:#1e7145;
+  --xl-green-light:#21a366;
+  --xl-header:#217346;
+  --xl-cell:#ffffff;
+  --xl-alt:#f2f2f2;
+  --xl-border:#d0cece;
+  --xl-sel:#cce8ff;
+  --xl-row:#e8f2e8;
+  --font:'Segoe UI',system-ui,sans-serif;
+}
+html,body{height:100%;overflow:hidden;background:var(--pbi-bg);}
+body{font-family:var(--font);font-size:13px;color:var(--pbi-text);}
+
+/* ═══════════════════════════════════
+   POWER BI CHROME
+═══════════════════════════════════ */
+#pbi-titlebar{
+  height:40px;background:var(--pbi-header);
+  display:flex;align-items:center;padding:0 12px;gap:12px;
+  flex-shrink:0;
+}
+.pbi-logo{
+  display:flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:#fff;letter-spacing:.02em;
+}
+.pbi-logo-icon{
+  width:20px;height:20px;position:relative;display:flex;align-items:center;justify-content:center;
+}
+.pbi-logo-icon svg{width:20px;height:20px;}
+.pbi-title-name{
+  font-size:12px;color:rgba(255,255,255,.7);
+  border-left:1px solid rgba(255,255,255,.2);
+  padding-left:12px;margin-left:4px;
+}
+.pbi-titlebar-actions{
+  margin-left:auto;display:flex;align-items:center;gap:4px;
+}
+.pbi-title-btn{
+  width:28px;height:28px;border:none;background:transparent;
+  color:rgba(255,255,255,.7);cursor:pointer;border-radius:2px;
+  font-size:12px;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.pbi-title-btn:hover{background:rgba(255,255,255,.1);}
+.pbi-saved{font-size:11px;color:rgba(255,255,255,.5);margin-left:8px;}
+
+/* ── RIBBON ── */
+#pbi-ribbon{
+  height:44px;background:var(--pbi-header);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:stretch;padding:0 8px;
+  flex-shrink:0;
+}
+.ribbon-tab{
+  padding:0 14px;font-size:12px;color:rgba(255,255,255,.7);
+  cursor:pointer;display:flex;align-items:center;
+  border-bottom:3px solid transparent;
+  transition:all .15s;letter-spacing:.02em;
+}
+.ribbon-tab:hover{color:#fff;background:rgba(255,255,255,.06);}
+.ribbon-tab.active{color:var(--pbi-accent);border-bottom-color:var(--pbi-accent);}
+
+/* ── MAIN LAYOUT ── */
+#pbi-main{
+  display:flex;height:calc(100vh - 84px);overflow:hidden;
+}
+
+/* ── LEFT NAV PANEL ── */
+#pbi-nav{
+  width:220px;background:var(--pbi-nav);
+  display:flex;flex-direction:column;
+  flex-shrink:0;overflow-y:auto;
+}
+.nav-section-title{
+  font-size:10px;font-weight:600;color:rgba(255,255,255,.4);
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:16px 16px 6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;cursor:pointer;
+  font-size:12px;color:rgba(255,255,255,.75);
+  transition:background .15s;border-radius:0;
+  position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,.08);}
+.nav-item.active{
+  background:rgba(242,200,17,.12);
+  color:var(--pbi-accent);
+}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--pbi-accent);
+}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;
+  background:var(--pbi-accent);color:#000;
+  font-size:9px;font-weight:700;
+  padding:1px 5px;border-radius:8px;
+}
+
+/* ── CANVAS AREA ── */
+#pbi-canvas{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:16px;background:var(--pbi-bg);
+}
+
+/* ── PAGE (hidden by default) ── */
+.pbi-page{display:none;}
+.pbi-page.active{display:block;}
+
+/* ═══════════════════════════════════
+   SLICER PANEL
+═══════════════════════════════════ */
+.slicer-bar{
+  display:flex;align-items:center;gap:8px;
+  background:#fff;border:1px solid var(--pbi-border);
+  padding:8px 14px;margin-bottom:14px;
+  border-radius:2px;flex-wrap:wrap;
+}
+.slicer-label{
+  font-size:10px;font-weight:600;color:var(--pbi-muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-right:4px;
+}
+.slicer-chip{
+  padding:3px 10px;border-radius:12px;
+  border:1px solid var(--pbi-border);
+  font-size:11px;cursor:pointer;transition:all .15s;background:#fff;
+  color:var(--pbi-muted);
+}
+.slicer-chip:hover{border-color:var(--pbi-blue);color:var(--pbi-blue);}
+.slicer-chip.active{background:var(--pbi-blue);color:#fff;border-color:var(--pbi-blue);}
+.slicer-divider{width:1px;height:20px;background:var(--pbi-border);}
+
+/* ═══════════════════════════════════
+   KPI CARDS
+═══════════════════════════════════ */
+.kpi-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  margin-bottom:14px;
+}
+.kpi-card{
+  background:#fff;border:1px solid var(--pbi-border);
+  padding:14px 16px;border-radius:2px;
+  position:relative;overflow:hidden;
+  transition:box-shadow .2s;cursor:default;
+}
+.kpi-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.kpi-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.kpi-card.blue::before{background:var(--pbi-blue);}
+.kpi-card.orange::before{background:var(--pbi-orange);}
+.kpi-card.green::before{background:var(--pbi-green);}
+.kpi-card.purple::before{background:var(--pbi-purple);}
+.kpi-label{
+  font-size:10px;font-weight:600;color:var(--pbi-muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;
+}
+.kpi-value{
+  font-size:28px;font-weight:300;color:var(--pbi-text);
+  line-height:1;margin-bottom:4px;letter-spacing:-.5px;
+}
+.kpi-value.colored{font-size:26px;font-weight:600;}
+.kpi-value.blue-v{color:var(--pbi-blue);}
+.kpi-value.orange-v{color:var(--pbi-orange);}
+.kpi-value.green-v{color:var(--pbi-green);}
+.kpi-value.purple-v{color:var(--pbi-purple);}
+.kpi-delta{
+  font-size:11px;display:flex;align-items:center;gap:4px;
+}
+.kpi-delta.up{color:var(--pbi-green);}
+.kpi-delta.neutral{color:var(--pbi-muted);}
+.kpi-sparkline{
+  position:absolute;bottom:10px;right:12px;
+  opacity:.25;
+}
+
+/* ═══════════════════════════════════
+   CHART CONTAINERS
+═══════════════════════════════════ */
+.chart-row{
+  display:grid;gap:10px;margin-bottom:14px;
+}
+.chart-row.cols-2{grid-template-columns:1fr 1fr;}
+.chart-row.cols-3{grid-template-columns:2fr 1fr 1fr;}
+.chart-row.cols-1-2{grid-template-columns:1fr 2fr;}
+
+.chart-panel{
+  background:#fff;border:1px solid var(--pbi-border);
+  border-radius:2px;overflow:hidden;
+  transition:box-shadow .2s;
+}
+.chart-panel:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.chart-header{
+  padding:12px 16px 8px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  border-bottom:1px solid var(--pbi-border);
+}
+.chart-title{font-size:12px;font-weight:600;color:var(--pbi-text);}
+.chart-subtitle{font-size:10px;color:var(--pbi-muted);margin-top:2px;}
+.chart-actions{display:flex;gap:4px;}
+.chart-action-btn{
+  width:22px;height:22px;border:none;background:transparent;
+  cursor:pointer;border-radius:2px;font-size:11px;
+  color:var(--pbi-muted);display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.chart-action-btn:hover{background:var(--pbi-bg);color:var(--pbi-text);}
+.chart-body{padding:14px 16px;}
+
+/* ── BAR CHART ── */
+.bar-chart{display:flex;flex-direction:column;gap:10px;}
+.bar-row{display:flex;align-items:center;gap:10px;}
+.bar-label{
+  font-size:11px;color:var(--pbi-muted);
+  min-width:90px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.bar-track{
+  flex:1;height:20px;background:var(--pbi-bg);
+  border-radius:1px;overflow:hidden;position:relative;
+}
+.bar-fill{
+  height:100%;border-radius:1px;
+  transition:width 1s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.bar-fill::after{
+  content:attr(data-val);
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  font-size:10px;font-weight:600;color:#fff;white-space:nowrap;
+}
+.bar-fill.blue{background:var(--pbi-blue);}
+.bar-fill.orange{background:var(--pbi-orange);}
+.bar-fill.green{background:var(--pbi-green);}
+.bar-fill.purple{background:var(--pbi-purple);}
+.bar-fill.teal{background:var(--pbi-teal);}
+.bar-fill.red{background:var(--pbi-red);}
+
+/* ── DONUT CHART ── */
+.donut-wrap{display:flex;align-items:center;gap:20px;padding:8px 0;}
+.donut-svg{flex-shrink:0;}
+.donut-legend{display:flex;flex-direction:column;gap:7px;flex:1;}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--pbi-text);}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.legend-pct{margin-left:auto;font-weight:600;color:var(--pbi-muted);font-size:10px;}
+
+/* ── SCATTER / TIMELINE ── */
+.timeline-chart{position:relative;padding:8px 0;}
+.tl-axis{
+  display:flex;justify-content:space-between;
+  font-size:10px;color:var(--pbi-muted);
+  border-top:1px solid var(--pbi-border);
+  padding-top:6px;margin-top:6px;
+}
+.tl-event{
+  display:flex;gap:12px;padding:8px 0;
+  border-bottom:1px solid var(--pbi-bg);
+  align-items:flex-start;transition:background .15s;
+  margin:0 -16px;padding-left:16px;padding-right:16px;
+}
+.tl-event:hover{background:var(--pbi-light);}
+.tl-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;margin-top:2px;}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.tl-line{width:1px;height:100%;background:var(--pbi-border);flex:1;margin-top:2px;}
+.tl-date{font-size:10px;color:var(--pbi-muted);white-space:nowrap;min-width:55px;flex-shrink:0;}
+.tl-name{font-size:12px;font-weight:600;color:var(--pbi-text);}
+.tl-org{font-size:10px;color:var(--pbi-muted);}
+.tl-desc{font-size:11px;color:var(--pbi-muted);margin-top:2px;line-height:1.5;}
+
+/* ── TABLE ── */
+.pbi-table{width:100%;border-collapse:collapse;font-size:12px;}
+.pbi-table th{
+  background:var(--pbi-bg);font-weight:600;
+  padding:8px 12px;text-align:left;
+  border-bottom:2px solid var(--pbi-border);
+  font-size:10px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--pbi-muted);
+  cursor:pointer;white-space:nowrap;
+}
+.pbi-table th:hover{background:#eee;}
+.pbi-table th.sorted::after{content:' ↓';color:var(--pbi-blue);}
+.pbi-table td{
+  padding:8px 12px;border-bottom:1px solid var(--pbi-border);
+  color:var(--pbi-text);vertical-align:middle;
+}
+.pbi-table tr:hover td{background:var(--pbi-light);}
+.status-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;
+}
+.pill-green{background:#dff6dd;color:var(--pbi-green);}
+.pill-blue{background:#deecf9;color:var(--pbi-blue);}
+.pill-orange{background:#fff4ce;color:var(--pbi-orange);}
+.pill-purple{background:#ead7f7;color:var(--pbi-purple);}
+
+/* ── GAUGE ── */
+.gauge-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.gauge-item{text-align:center;padding:8px 0;}
+.gauge-svg{}
+.gauge-val{font-size:18px;font-weight:600;color:var(--pbi-text);}
+.gauge-lbl{font-size:10px;color:var(--pbi-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+
+/* ── MATRIX / HEATMAP ── */
+.matrix-table{width:100%;border-collapse:collapse;font-size:11px;}
+.matrix-table th{
+  padding:6px 8px;text-align:center;font-weight:600;
+  font-size:10px;color:var(--pbi-muted);background:var(--pbi-bg);
+  border:1px solid var(--pbi-border);
+}
+.matrix-table td{
+  padding:6px 8px;text-align:center;
+  border:1px solid var(--pbi-border);font-weight:600;
+}
+
+/* ── INFO CARD ── */
+.info-card{
+  background:var(--pbi-light);border:1px solid var(--pbi-border);
+  border-radius:2px;padding:12px 14px;margin-bottom:8px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.info-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.info-title{font-size:12px;font-weight:600;color:var(--pbi-text);margin-bottom:3px;}
+.info-body{font-size:11px;color:var(--pbi-muted);line-height:1.6;}
+.info-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.info-tag{
+  font-size:10px;padding:2px 7px;
+  background:var(--pbi-blue);color:#fff;border-radius:2px;
+}
+
+/* ═══════════════════════════════════
+   EXCEL SHEET (separate tab)
+═══════════════════════════════════ */
+#pbi-canvas.xl-mode{padding:0;background:#e1e0df;}
+.xl-ribbon{
+  height:38px;background:#217346;
+  display:flex;align-items:center;padding:0 8px;gap:0;
+  flex-shrink:0;
+}
+.xl-ribbon-tab{
+  padding:0 12px;height:38px;font-size:12px;
+  color:rgba(255,255,255,.8);cursor:pointer;
+  display:flex;align-items:center;
+  border-bottom:2px solid transparent;
+  transition:all .15s;
+}
+.xl-ribbon-tab:hover{color:#fff;background:rgba(255,255,255,.1);}
+.xl-ribbon-tab.active{color:#fff;background:rgba(255,255,255,.15);border-bottom-color:#fff;}
+
+.xl-formula-bar{
+  height:26px;background:#fff;
+  border-bottom:1px solid var(--xl-border);
+  display:flex;align-items:center;padding:0 8px;gap:8px;
+}
+.xl-cell-ref{
+  width:72px;background:var(--xl-alt);border:1px solid var(--xl-border);
+  padding:2px 6px;font-size:11px;text-align:center;flex-shrink:0;
+  font-family:'Consolas',monospace;
+}
+.xl-fx{
+  font-size:11px;color:var(--pbi-muted);flex-shrink:0;font-style:italic;
+}
+.xl-formula-input{
+  flex:1;font-family:'Consolas',monospace;font-size:11px;
+  border:none;outline:none;padding:0 4px;background:transparent;
+  color:var(--pbi-text);
+}
+
+.xl-sheet{
+  display:grid;overflow:auto;
+  border:1px solid var(--xl-border);
+  background:#fff;
+  height:calc(100% - 90px);
+}
+.xl-col-headers{
+  display:contents;
+}
+.xl-row-num{
+  background:var(--xl-alt);border-right:1px solid var(--xl-border);
+  border-bottom:1px solid var(--xl-border);
+  padding:2px 6px;font-size:11px;text-align:center;
+  color:var(--pbi-muted);font-family:'Consolas',monospace;
+  min-width:40px;white-space:nowrap;
+  position:sticky;left:0;z-index:2;
+}
+.xl-col-hdr{
+  background:var(--xl-alt);
+  border-right:1px solid var(--xl-border);
+  border-bottom:2px solid var(--xl-border);
+  padding:2px 6px;font-size:11px;text-align:center;
+  color:var(--pbi-muted);font-weight:600;
+  font-family:'Consolas',monospace;
+  min-width:110px;white-space:nowrap;
+  position:sticky;top:0;z-index:3;
+}
+.xl-col-hdr.narrow{min-width:56px;}
+.xl-cell{
+  border-right:1px solid var(--xl-border);
+  border-bottom:1px solid var(--xl-border);
+  padding:2px 8px;font-size:11px;
+  font-family:'Consolas',monospace;
+  white-space:nowrap;cursor:cell;
+  transition:background .1s;
+  min-width:110px;
+}
+.xl-cell.narrow{min-width:56px;}
+.xl-cell:hover{background:var(--xl-sel);}
+.xl-cell.selected{background:var(--xl-sel);outline:2px solid var(--pbi-blue);outline-offset:-1px;}
+.xl-cell.header-row{
+  background:#217346;color:#fff;font-weight:700;
+  font-family:'Segoe UI',sans-serif;font-size:11px;
+}
+.xl-cell.alt-row{background:var(--xl-row);}
+.xl-cell.bold{font-weight:700;}
+.xl-cell.center{text-align:center;}
+.xl-cell.right{text-align:right;}
+.xl-cell.green-txt{color:var(--pbi-green);font-weight:700;}
+.xl-cell.blue-txt{color:var(--pbi-blue);}
+.xl-cell.orange-txt{color:var(--pbi-orange);}
+.xl-cell.formula{color:var(--pbi-blue);font-style:italic;}
+
+/* conditional format bars in cells */
+.xl-bar-cell{position:relative;}
+.xl-bar-bg{
+  position:absolute;left:0;top:0;bottom:0;
+  opacity:.2;border-radius:0;pointer-events:none;
+}
+
+/* sheet tabs */
+.xl-tabs-bar{
+  height:26px;background:#e1e0df;
+  border-top:1px solid var(--xl-border);
+  display:flex;align-items:stretch;padding-left:40px;gap:1px;
+  overflow-x:auto;
+}
+.xl-sheet-tab{
+  padding:0 14px;font-size:11px;background:var(--xl-alt);
+  border:1px solid var(--xl-border);border-bottom:none;
+  cursor:pointer;display:flex;align-items:center;white-space:nowrap;
+  color:var(--pbi-muted);min-width:80px;justify-content:center;
+}
+.xl-sheet-tab.active{
+  background:#fff;color:var(--xl-green);font-weight:600;
+  border-bottom:2px solid #fff;
+}
+
+/* ═══════════════════════════════════
+   PAGE TABS (bottom PBI style)
+═══════════════════════════════════ */
+#pbi-page-tabs{
+  height:32px;background:var(--pbi-header);
+  display:flex;align-items:stretch;padding:0 12px;gap:2px;
+  flex-shrink:0;border-top:1px solid rgba(255,255,255,.05);
+  overflow-x:auto;
+}
+.page-tab{
+  padding:0 16px;font-size:11px;color:rgba(255,255,255,.6);
+  cursor:pointer;display:flex;align-items:center;gap:5px;
+  border-top:3px solid transparent;
+  transition:all .15s;white-space:nowrap;
+}
+.page-tab:hover{color:#fff;background:rgba(255,255,255,.06);}
+.page-tab.active{
+  color:#fff;background:rgba(255,255,255,.1);
+  border-top-color:var(--pbi-accent);
+}
+.page-tab-icon{font-size:13px;}
+
+/* ═══════════════════════════════════
+   QUIZ CARD (floats in PBI style)
+═══════════════════════════════════ */
+.quiz-visual{
+  background:#fff;border:1px solid var(--pbi-border);
+  border-radius:2px;overflow:hidden;
+}
+.quiz-vis-header{
+  padding:10px 16px 8px;border-bottom:1px solid var(--pbi-border);
+  display:flex;justify-content:space-between;align-items:flex-start;
+}
+.quiz-vis-title{font-size:12px;font-weight:600;color:var(--pbi-text);}
+.quiz-vis-sub{font-size:10px;color:var(--pbi-muted);margin-top:2px;}
+.quiz-vis-body{padding:14px 16px;}
+.quiz-progress-outer{
+  height:4px;background:var(--pbi-bg);margin-bottom:12px;
+}
+.quiz-progress-inner{height:100%;background:var(--pbi-blue);transition:width .4s ease;}
+.quiz-question{font-size:13px;font-weight:600;color:var(--pbi-text);margin-bottom:10px;line-height:1.5;}
+.quiz-opts{display:flex;flex-direction:column;gap:5px;}
+.qopt{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border:1px solid var(--pbi-border);
+  background:var(--pbi-light);cursor:pointer;transition:all .15s;
+  font-size:12px;color:var(--pbi-text);
+}
+.qopt:hover:not(.disabled){background:var(--pbi-blue);color:#fff;border-color:var(--pbi-blue);}
+.qopt.correct{background:#dff6dd;border-color:var(--pbi-green);color:var(--pbi-green);}
+.qopt.wrong{background:#fde7e9;border-color:var(--pbi-red);color:var(--pbi-red);}
+.qopt.disabled{cursor:default;}
+.qopt-key{font-weight:700;min-width:16px;font-size:11px;flex-shrink:0;}
+.quiz-feedback{
+  font-size:11px;line-height:1.6;color:var(--pbi-muted);
+  background:var(--pbi-light);border-left:3px solid var(--pbi-blue);
+  padding:7px 10px;margin-top:8px;display:none;
+}
+.quiz-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 16px;border-top:1px solid var(--pbi-border);background:var(--pbi-light);
+}
+.quiz-hint-txt{font-size:10px;color:var(--pbi-muted);font-style:italic;}
+.quiz-score-display{font-size:11px;color:var(--pbi-muted);}
+.quiz-score-display strong{color:var(--pbi-blue);font-weight:700;}
+#quiz-next-btn{
+  background:var(--pbi-blue);color:#fff;border:none;cursor:pointer;
+  padding:5px 14px;font-size:11px;font-family:var(--font);
+  transition:background .15s;
+  display:none;
+}
+#quiz-next-btn:hover{background:#006cbf;}
+.quiz-result-panel{display:none;text-align:center;padding:20px 16px;}
+.quiz-result-score{font-size:36px;font-weight:300;color:var(--pbi-blue);margin-bottom:6px;}
+.quiz-result-label{font-size:10px;color:var(--pbi-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;}
+.quiz-result-msg{font-size:12px;color:var(--pbi-muted);margin-bottom:14px;line-height:1.7;}
+.quiz-result-msg strong{color:var(--pbi-text);}
+.badge-row{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.badge{font-size:10px;padding:3px 9px;border:1px solid var(--pbi-border);color:var(--pbi-muted);}
+.badge.earned{background:#dff6dd;border-color:#a4cf9e;color:var(--pbi-green);font-weight:600;}
+.round-note{font-size:10px;color:var(--pbi-muted);margin-bottom:12px;}
+#quiz-restart-btn{
+  background:var(--pbi-blue);color:#fff;border:none;cursor:pointer;
+  padding:6px 18px;font-size:12px;font-family:var(--font);
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:var(--pbi-bg);}
+::-webkit-scrollbar-thumb{background:#c8c6c4;border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:#a19f9d;}
+
+/* ── TOOLTIP ── */
+.chart-tooltip{
+  display:none;position:absolute;
+  background:rgba(0,0,0,.85);color:#fff;
+  padding:6px 10px;font-size:11px;
+  border-radius:2px;pointer-events:none;z-index:999;
+  white-space:nowrap;
+}
+
+/* ─ Responsive ─ */
+@media(max-width:900px){
+  #pbi-nav{display:none;}
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  .chart-row.cols-2,.chart-row.cols-3,.chart-row.cols-1-2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- TITLE BAR -->
+<div id="pbi-titlebar">
+  <div class="pbi-logo">
+    <div class="pbi-logo-icon">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="1" y="10" width="4" height="9" fill="#f2c811"/>
+        <rect x="7" y="6" width="4" height="13" fill="#f2c811" opacity=".85"/>
+        <rect x="13" y="2" width="4" height="17" fill="#f2c811" opacity=".7"/>
+      </svg>
+    </div>
+    Power BI Desktop
+  </div>
+  <div class="pbi-title-name">Sairam_Portfolio.pbix</div>
+  <div class="pbi-saved">● Saved</div>
+  <div class="pbi-titlebar-actions">
+    <button class="pbi-title-btn" title="Share">⬆</button>
+    <button class="pbi-title-btn" title="Comments">💬</button>
+    <button class="pbi-title-btn" title="Minimize">—</button>
+    <button class="pbi-title-btn" title="Maximize">□</button>
+    <button class="pbi-title-btn" title="Close">✕</button>
+  </div>
+</div>
+
+<!-- RIBBON -->
+<div id="pbi-ribbon">
+  <div class="ribbon-tab active">File</div>
+  <div class="ribbon-tab">Home</div>
+  <div class="ribbon-tab">Insert</div>
+  <div class="ribbon-tab">Modeling</div>
+  <div class="ribbon-tab">View</div>
+  <div class="ribbon-tab">Optimize</div>
+  <div class="ribbon-tab">Help</div>
+</div>
+
+<!-- MAIN -->
+<div id="pbi-main">
+
+  <!-- LEFT NAV -->
+  <div id="pbi-nav">
+    <div class="nav-section-title">Report Pages</div>
+    <div class="nav-item active" onclick="switchPage('overview',this)">
+      <span class="nav-icon">📊</span> Overview
+      <span class="nav-badge">NEW</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('projects',this)">
+      <span class="nav-icon">📁</span> Projects
+    </div>
+    <div class="nav-item" onclick="switchPage('skills',this)">
+      <span class="nav-icon">💡</span> Skills Matrix
+    </div>
+    <div class="nav-item" onclick="switchPage('timeline',this)">
+      <span class="nav-icon">📅</span> Timeline
+    </div>
+    <div class="nav-item" onclick="switchPage('certs',this)">
+      <span class="nav-icon">🏅</span> Certifications
+    </div>
+    <div class="nav-item" onclick="switchPage('quiz',this)">
+      <span class="nav-icon">📝</span> Quiz Me!
+    </div>
+    <div class="nav-item" onclick="switchPage('excel',this)">
+      <span class="nav-icon">🟢</span> Excel View
+    </div>
+    <div class="nav-section-title" style="margin-top:16px;">Data</div>
+    <div class="nav-item"><span class="nav-icon">🗃️</span> Data Model</div>
+    <div class="nav-item"><span class="nav-icon">🔗</span> Relationships</div>
+    <div class="nav-item"><span class="nav-icon">🔄</span> Refresh</div>
+    <div class="nav-section-title" style="margin-top:16px;">Contact</div>
+    <div class="nav-item" onclick="window.open('mailto:sairam.patro000@gmail.com')">
+      <span class="nav-icon">✉️</span> Email
+    </div>
+    <div class="nav-item" onclick="window.open('https://github.com/Sairam-Patro','_blank')">
+      <span class="nav-icon">🌐</span> GitHub
+    </div>
+    <div class="nav-item" onclick="window.open('https://linkedin.com/in/sairam-patro/','_blank')">
+      <span class="nav-icon">💼</span> LinkedIn
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div id="pbi-canvas">
+
+    <!-- ══ PAGE: OVERVIEW ══ -->
+    <div class="pbi-page active" id="page-overview">
+      <div class="slicer-bar">
+        <span class="slicer-label">Filter:</span>
+        <span class="slicer-chip active" onclick="setChip(this)">All</span>
+        <span class="slicer-chip" onclick="setChip(this)">2023</span>
+        <span class="slicer-chip" onclick="setChip(this)">2024</span>
+        <span class="slicer-chip" onclick="setChip(this)">2025</span>
+        <div class="slicer-divider"></div>
+        <span class="slicer-label">Domain:</span>
+        <span class="slicer-chip active" onclick="setChip(this)">All</span>
+        <span class="slicer-chip" onclick="setChip(this)">Data</span>
+        <span class="slicer-chip" onclick="setChip(this)">Systems</span>
+        <span class="slicer-chip" onclick="setChip(this)">Web</span>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="kpi-row">
+        <div class="kpi-card blue">
+          <div class="kpi-label">Current CGPA</div>
+          <div class="kpi-value colored blue-v">8.27</div>
+          <div class="kpi-delta up">▲ B.Tech CSE, LPU</div>
+          <svg class="kpi-sparkline" width="60" height="24" viewBox="0 0 60 24">
+            <polyline points="0,20 12,16 24,12 36,8 48,10 60,6" fill="none" stroke="#0078d4" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="kpi-card orange">
+          <div class="kpi-label">LeetCode Solved</div>
+          <div class="kpi-value colored orange-v">300+</div>
+          <div class="kpi-delta up">▲ Nov 2025 milestone</div>
+          <svg class="kpi-sparkline" width="60" height="24" viewBox="0 0 60 24">
+            <polyline points="0,22 12,18 24,14 36,10 48,7 60,4" fill="none" stroke="#e07b00" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Training Hours</div>
+          <div class="kpi-value colored green-v">140+</div>
+          <div class="kpi-delta up">▲ ByteXL DSA intensive</div>
+          <svg class="kpi-sparkline" width="60" height="24" viewBox="0 0 60 24">
+            <polyline points="0,22 20,18 40,10 60,4" fill="none" stroke="#107c10" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">NPTEL Rank</div>
+          <div class="kpi-value colored purple-v">ELITE</div>
+          <div class="kpi-delta neutral">12,697 participants</div>
+          <svg class="kpi-sparkline" width="60" height="24" viewBox="0 0 60 24">
+            <polyline points="0,20 15,16 30,12 45,6 60,4" fill="none" stroke="#5c2d91" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW 1 -->
+      <div class="chart-row cols-2">
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div><div class="chart-title">Skills Proficiency by Category</div><div class="chart-subtitle">Self-assessment · 5-point scale</div></div>
+            <div class="chart-actions"><button class="chart-action-btn">⋯</button></div>
+          </div>
+          <div class="chart-body">
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-label">C / C++</span><div class="bar-track"><div class="bar-fill blue" style="width:88%" data-val="4.4/5"></div></div></div>
+              <div class="bar-row"><span class="bar-label">Power BI</span><div class="bar-track"><div class="bar-fill orange" style="width:85%" data-val="4.2/5"></div></div></div>
+              <div class="bar-row"><span class="bar-label">DSA</span><div class="bar-track"><div class="bar-fill blue" style="width:80%" data-val="4.0/5"></div></div></div>
+              <div class="bar-row"><span class="bar-label">Excel / DAX</span><div class="bar-track"><div class="bar-fill green" style="width:78%" data-val="3.9/5"></div></div></div>
+              <div class="bar-row"><span class="bar-label">Python</span><div class="bar-track"><div class="bar-fill purple" style="width:70%" data-val="3.5/5"></div></div></div>
+              <div class="bar-row"><span class="bar-label">HTML/CSS/JS</span><div class="bar-track"><div class="bar-fill teal" style="width:74%" data-val="3.7/5"></div></div></div>
+              <div class="bar-row"><span class="bar-label">Java</span><div class="bar-track"><div class="bar-fill red" style="width:66%" data-val="3.3/5"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div><div class="chart-title">Projects by Domain</div><div class="chart-subtitle">Distribution across 5 completed projects</div></div>
+            <div class="chart-actions"><button class="chart-action-btn">⋯</button></div>
+          </div>
+          <div class="chart-body">
+            <div class="donut-wrap">
+              <svg class="donut-svg" width="130" height="130" viewBox="0 0 130 130">
+                <!-- Data Analytics 40% -->
+                <circle cx="65" cy="65" r="45" fill="none" stroke="#e07b00" stroke-width="22"
+                  stroke-dasharray="113.1 169.6" stroke-dashoffset="-0" transform="rotate(-90 65 65)"/>
+                <!-- Systems 20% -->
+                <circle cx="65" cy="65" r="45" fill="none" stroke="#0078d4" stroke-width="22"
+                  stroke-dasharray="56.5 226.2" stroke-dashoffset="-113.1" transform="rotate(-90 65 65)"/>
+                <!-- Web/AI 20% -->
+                <circle cx="65" cy="65" r="45" fill="none" stroke="#107c10" stroke-width="22"
+                  stroke-dasharray="56.5 226.2" stroke-dashoffset="-169.6" transform="rotate(-90 65 65)"/>
+                <!-- C++ 20% -->
+                <circle cx="65" cy="65" r="45" fill="none" stroke="#5c2d91" stroke-width="22"
+                  stroke-dasharray="56.5 226.2" stroke-dashoffset="-226.1" transform="rotate(-90 65 65)"/>
+                <text x="65" y="61" text-anchor="middle" font-size="16" font-weight="600" fill="#323130">5</text>
+                <text x="65" y="74" text-anchor="middle" font-size="10" fill="#605e5c">Projects</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:#e07b00"></div>Data Analytics<span class="legend-pct">40%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#0078d4"></div>Systems/OS<span class="legend-pct">20%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#107c10"></div>Web / AI<span class="legend-pct">20%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#5c2d91"></div>C++ / OOP<span class="legend-pct">20%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW 2 -->
+      <div class="chart-row cols-3">
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div><div class="chart-title">Education Record</div><div class="chart-subtitle">Score trend across institutions</div></div>
+            <div class="chart-actions"><button class="chart-action-btn">⋯</button></div>
+          </div>
+          <div class="chart-body">
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-label">10th (CBSE)</span><div class="bar-track"><div class="bar-fill green" style="width:81.4%" data-val="81.4%"></div></div></div>
+              <div class="bar-row"><span class="bar-label">12th Science</span><div class="bar-track"><div class="bar-fill orange" style="width:75.6%" data-val="75.6%"></div></div></div>
+              <div class="bar-row"><span class="bar-label">B.Tech (CGPA)</span><div class="bar-track"><div class="bar-fill blue" style="width:82.7%" data-val="8.27/10"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div><div class="chart-title">Certificates</div><div class="chart-subtitle">By issuer</div></div>
+          </div>
+          <div class="chart-body">
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-label">Infosys</span><div class="bar-track"><div class="bar-fill blue" style="width:60%" data-val="3"></div></div></div>
+              <div class="bar-row"><span class="bar-label">NPTEL</span><div class="bar-track"><div class="bar-fill orange" style="width:20%" data-val="1"></div></div></div>
+              <div class="bar-row"><span class="bar-label">CSE Path.</span><div class="bar-track"><div class="bar-fill green" style="width:20%" data-val="1"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div><div class="chart-title">Quick Stats</div></div>
+          </div>
+          <div class="chart-body" style="padding:10px 12px;">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid var(--pbi-border);padding-bottom:6px;">
+                <span style="color:var(--pbi-muted);">University</span><span style="font-weight:600;">LPU, Punjab</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid var(--pbi-border);padding-bottom:6px;">
+                <span style="color:var(--pbi-muted);">Hometown</span><span style="font-weight:600;">Berhampur, Odisha</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid var(--pbi-border);padding-bottom:6px;">
+                <span style="color:var(--pbi-muted);">Projects Done</span><span style="font-weight:600;color:var(--pbi-blue);">5</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid var(--pbi-border);padding-bottom:6px;">
+                <span style="color:var(--pbi-muted);">Top Language</span><span style="font-weight:600;">C++</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;">
+                <span style="color:var(--pbi-muted);">Top Tool</span><span style="font-weight:600;">Power BI</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: PROJECTS ══ -->
+    <div class="pbi-page" id="page-projects">
+      <div class="slicer-bar">
+        <span class="slicer-label">Type:</span>
+        <span class="slicer-chip active" onclick="setChip(this)">All Projects</span>
+        <span class="slicer-chip" onclick="setChip(this)">Analytics</span>
+        <span class="slicer-chip" onclick="setChip(this)">Web / AI</span>
+        <span class="slicer-chip" onclick="setChip(this)">Systems</span>
+      </div>
+      <div class="chart-row cols-2" style="margin-bottom:10px;">
+        <div class="info-card" style="border-left:4px solid #e07b00;">
+          <div class="info-icon">📊</div>
+          <div>
+            <div class="info-title">Tuber Service Analytics Dashboard</div>
+            <div class="info-body">Interactive Power BI dashboard analyzing ride data — trip volume, fare amounts, distance, and driver performance. Cleaned raw data using Power Query, built dynamic KPIs and DAX measures.</div>
+            <div class="info-tags"><span class="info-tag">Power BI</span><span class="info-tag">Power Query</span><span class="info-tag">DAX</span><span class="info-tag">Excel</span><span style="font-size:10px;color:var(--pbi-muted);padding:2px 0;">Oct 2025</span></div>
+          </div>
+        </div>
+        <div class="info-card" style="border-left:4px solid #0078d4;">
+          <div class="info-icon">🤖</div>
+          <div>
+            <div class="info-title">Stress Relief Chatbot</div>
+            <div class="info-body">Web-based chatbot integrated with Gemini API for AI-powered mental wellness advice. Real-time message handling with clean UX — context-aware responses for stress management.</div>
+            <div class="info-tags"><span class="info-tag" style="background:#0078d4;">HTML</span><span class="info-tag" style="background:#0078d4;">CSS</span><span class="info-tag" style="background:#0078d4;">JavaScript</span><span class="info-tag" style="background:#0078d4;">Gemini API</span><span style="font-size:10px;color:var(--pbi-muted);padding:2px 0;">Apr 2025</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-row cols-2" style="margin-bottom:10px;">
+        <div class="info-card" style="border-left:4px solid #107c10;">
+          <div class="info-icon">⚙️</div>
+          <div>
+            <div class="info-title">CPU Scheduler Simulator</div>
+            <div class="info-body">Interactive web simulator for 5 OS scheduling algorithms — FCFS, SJF, SRTF, Priority, and Round Robin. Live Gantt chart visualizations with turnaround and waiting time outputs.</div>
+            <div class="info-tags"><span class="info-tag" style="background:#107c10;">HTML</span><span class="info-tag" style="background:#107c10;">CSS</span><span class="info-tag" style="background:#107c10;">JavaScript</span><span style="font-size:10px;color:var(--pbi-muted);padding:2px 0;">Mar 2025</span></div>
+          </div>
+        </div>
+        <div class="info-card" style="border-left:4px solid #008272;">
+          <div class="info-icon">📈</div>
+          <div>
+            <div class="info-title">Air Quality Analysis Dashboard</div>
+            <div class="info-body">Excel dashboard with Pivot Tables and Charts analyzing NYC air quality — pollutant levels, health indicators across boroughs with dynamic region-wise slicers and filters.</div>
+            <div class="info-tags"><span class="info-tag" style="background:#008272;">Excel</span><span class="info-tag" style="background:#008272;">Pivot Tables</span><span class="info-tag" style="background:#008272;">Pivot Charts</span><span style="font-size:10px;color:var(--pbi-muted);padding:2px 0;">Mar 2025</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="info-card" style="border-left:4px solid #5c2d91;">
+        <div class="info-icon">📚</div>
+        <div>
+          <div class="info-title">Library Management System</div>
+          <div class="info-body">Console-based C++ application — add, delete, search, issue and return books. OOP design with STL vectors and lists, hashing for O(1) average lookups. Full menu-driven interface.</div>
+          <div class="info-tags"><span class="info-tag" style="background:#5c2d91;">C++</span><span class="info-tag" style="background:#5c2d91;">OOP</span><span class="info-tag" style="background:#5c2d91;">STL</span><span class="info-tag" style="background:#5c2d91;">Hashing</span><span class="info-tag" style="background:#5c2d91;">Data Structures</span><span style="font-size:10px;color:var(--pbi-muted);padding:2px 0;">Mar 2025</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: SKILLS MATRIX ══ -->
+    <div class="pbi-page" id="page-skills">
+      <div class="chart-row cols-2">
+        <div class="chart-panel">
+          <div class="chart-header"><div><div class="chart-title">Technology Proficiency Matrix</div><div class="chart-subtitle">Heat map — intensity = proficiency</div></div></div>
+          <div class="chart-body" style="padding:10px;">
+            <table class="matrix-table">
+              <tr>
+                <th></th><th>Syntax</th><th>Projects</th><th>Problem Solving</th><th>Depth</th><th>Score</th>
+              </tr>
+              <tr>
+                <th style="text-align:left;">C++</th>
+                <td style="background:#bdd7ee;">★★★★★</td>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#2e75b6;color:#fff;">★★★★★</td>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#2e75b6;color:#fff;font-weight:700;">4.4</td>
+              </tr>
+              <tr>
+                <th style="text-align:left;">Power BI</th>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#2e75b6;color:#fff;">★★★★★</td>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#2e75b6;color:#fff;font-weight:700;">4.2</td>
+              </tr>
+              <tr>
+                <th style="text-align:left;">Python</th>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#bdd7ee;font-weight:700;">3.5</td>
+              </tr>
+              <tr>
+                <th style="text-align:left;">Excel/DAX</th>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#2e75b6;color:#fff;">★★★★★</td>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#bdd7ee;font-weight:700;">3.9</td>
+              </tr>
+              <tr>
+                <th style="text-align:left;">JavaScript</th>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#bdd7ee;">★★★★☆</td>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#dae8f5;font-weight:700;">3.5</td>
+              </tr>
+              <tr>
+                <th style="text-align:left;">MySQL</th>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#dae8f5;">★★★☆☆</td>
+                <td style="background:#dae8f5;font-weight:700;">3.0</td>
+              </tr>
+            </table>
+            <div style="font-size:10px;color:var(--pbi-muted);margin-top:8px;">
+              <span style="background:#2e75b6;color:#fff;padding:1px 6px;margin-right:4px;">Dark</span> Expert &nbsp;
+              <span style="background:#bdd7ee;padding:1px 6px;margin-right:4px;">Mid</span> Proficient &nbsp;
+              <span style="background:#dae8f5;padding:1px 6px;">Light</span> Learning
+            </div>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <div class="chart-header"><div><div class="chart-title">Skill Categories Breakdown</div><div class="chart-subtitle">Number of technologies per category</div></div></div>
+          <div class="chart-body">
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-label">Languages</span><div class="bar-track"><div class="bar-fill blue" style="width:80%" data-val="4 langs"></div></div></div>
+              <div class="bar-row"><span class="bar-label">Data & Viz</span><div class="bar-track"><div class="bar-fill orange" style="width:100%" data-val="5 tools"></div></div></div>
+              <div class="bar-row"><span class="bar-label">Dev Tools</span><div class="bar-track"><div class="bar-fill green" style="width:100%" data-val="5 tools"></div></div></div>
+              <div class="bar-row"><span class="bar-label">Web Tech</span><div class="bar-track"><div class="bar-fill teal" style="width:60%" data-val="3 techs"></div></div></div>
+              <div class="bar-row"><span class="bar-label">CS Theory</span><div class="bar-track"><div class="bar-fill purple" style="width:100%" data-val="5 topics"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: TIMELINE ══ -->
+    <div class="pbi-page" id="page-timeline">
+      <div class="chart-row cols-1-2">
+        <div class="chart-panel">
+          <div class="chart-header"><div><div class="chart-title">Academic Timeline</div><div class="chart-subtitle">Education journey 2020–Present</div></div></div>
+          <div class="chart-body" style="padding:8px 0 0;">
+            <div class="timeline-chart">
+              <div class="tl-event"><div class="tl-dot-wrap"><div class="tl-dot" style="background:#5c2d91;"></div></div><div class="tl-date">2020–21</div><div><div class="tl-name">St. Xavier's High School</div><div class="tl-org">Berhampur, Odisha</div><div class="tl-desc">Matriculation — 81.4%</div></div></div>
+              <div class="tl-event"><div class="tl-dot-wrap"><div class="tl-dot" style="background:#e07b00;"></div></div><div class="tl-date">2021–23</div><div><div class="tl-name">Mount Litera Zee School</div><div class="tl-org">Berhampur, Odisha</div><div class="tl-desc">12th Science — 75.6%</div></div></div>
+              <div class="tl-event"><div class="tl-dot-wrap"><div class="tl-dot" style="background:#107c10;"></div></div><div class="tl-date">Mar 2024</div><div><div class="tl-name">Mastering C: Basic to Beyond</div><div class="tl-org">CSE Pathshala</div><div class="tl-desc">Training cert — C fundamentals</div></div></div>
+              <div class="tl-event"><div class="tl-dot-wrap"><div class="tl-dot" style="background:#0078d4;"></div></div><div class="tl-date">May 2025</div><div><div class="tl-name">NPTEL Elite Award 🏆</div><div class="tl-org">12,697 participants</div><div class="tl-desc">Privacy & Security in Online Social Media</div></div></div>
+              <div class="tl-event"><div class="tl-dot-wrap"><div class="tl-dot" style="background:#e07b00;"></div></div><div class="tl-date">Jul 2025</div><div><div class="tl-name">DSA Training — ByteXL</div><div class="tl-org">140+ hours</div><div class="tl-desc">Competitive programming in C++</div></div></div>
+              <div class="tl-event"><div class="tl-dot-wrap"><div class="tl-dot" style="background:#f2c811;"></div></div><div class="tl-date">Aug 2025</div><div><div class="tl-name">3× Infosys Certs</div><div class="tl-org">Infosys Springboard</div><div class="tl-desc">GenAI tools + Finite Automata</div></div></div>
+              <div class="tl-event"><div class="tl-dot-wrap"><div class="tl-dot" style="background:#0078d4;"></div></div><div class="tl-date">Nov 2025</div><div><div class="tl-name">300+ LeetCode ⚡</div><div class="tl-org">Milestone achieved</div><div class="tl-desc">DSA, DP, Graphs, Trees, Strings</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <div class="chart-header"><div><div class="chart-title">Activity by Year</div><div class="chart-subtitle">Projects + Certs + Achievements</div></div></div>
+          <div class="chart-body">
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-label">2020</span><div class="bar-track"><div class="bar-fill purple" style="width:10%" data-val="1 event"></div></div></div>
+              <div class="bar-row"><span class="bar-label">2021–22</span><div class="bar-track"><div class="bar-fill orange" style="width:10%" data-val="1 event"></div></div></div>
+              <div class="bar-row"><span class="bar-label">2023</span><div class="bar-track"><div class="bar-fill blue" style="width:15%" data-val="1 event"></div></div></div>
+              <div class="bar-row"><span class="bar-label">2024</span><div class="bar-track"><div class="bar-fill green" style="width:20%" data-val="2 events"></div></div></div>
+              <div class="bar-row"><span class="bar-label">2025 H1</span><div class="bar-track"><div class="bar-fill blue" style="width:70%" data-val="7 events"></div></div></div>
+              <div class="bar-row"><span class="bar-label">2025 H2</span><div class="bar-track"><div class="bar-fill orange" style="width:100%" data-val="10+ events"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: CERTS ══ -->
+    <div class="pbi-page" id="page-certs">
+      <div class="chart-panel" style="margin-bottom:14px;">
+        <div class="chart-header"><div><div class="chart-title">Certifications — Full Record</div><div class="chart-subtitle">5 verified certificates · 2024–2025</div></div></div>
+        <div class="chart-body" style="padding:0;">
+          <table class="pbi-table" style="width:100%;">
+            <thead><tr>
+              <th class="sorted">#</th>
+              <th>Certification Name</th>
+              <th>Issuing Organization</th>
+              <th>Date</th>
+              <th>Domain</th>
+              <th>Status</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>001</td><td>Computational Theory: Language Principle & Finite Automata</td><td>Infosys Springboard</td><td>Aug 2025</td><td><span class="status-pill pill-purple">CS Theory</span></td><td><span class="status-pill pill-green">✔ Verified</span></td></tr>
+              <tr><td>002</td><td>Master Generative AI & Generative AI Tools</td><td>Infosys</td><td>Aug 2025</td><td><span class="status-pill pill-blue">AI / ML</span></td><td><span class="status-pill pill-green">✔ Verified</span></td></tr>
+              <tr><td>003</td><td>Build Generative AI Apps with No-Code Tools</td><td>Infosys</td><td>Aug 2025</td><td><span class="status-pill pill-blue">AI / ML</span></td><td><span class="status-pill pill-green">✔ Verified</span></td></tr>
+              <tr><td>004</td><td>Privacy and Security in Online Social Media</td><td>NPTEL</td><td>May 2025</td><td><span class="status-pill pill-orange">Security</span></td><td><span class="status-pill pill-green">✔ Elite</span></td></tr>
+              <tr><td>005</td><td>Mastering in C: Basics to Beyond</td><td>CSE Pathshala</td><td>Mar 2025</td><td><span class="status-pill pill-purple">Programming</span></td><td><span class="status-pill pill-green">✔ Verified</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+        <div class="kpi-card blue"><div class="kpi-label">Total Certs</div><div class="kpi-value colored blue-v">5</div><div class="kpi-delta neutral">2024–2025</div></div>
+        <div class="kpi-card orange"><div class="kpi-label">Infosys Certs</div><div class="kpi-value colored orange-v">3</div><div class="kpi-delta up">▲ All Aug 2025</div></div>
+        <div class="kpi-card green"><div class="kpi-label">NPTEL Award</div><div class="kpi-value colored green-v">ELITE</div><div class="kpi-delta up">▲ Top %ile nationwide</div></div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: QUIZ ══ -->
+    <div class="pbi-page" id="page-quiz">
+      <div class="chart-row cols-2">
+        <div class="quiz-visual">
+          <div class="quiz-vis-header">
+            <div><div class="quiz-vis-title">📝 Portfolio Knowledge Quiz</div><div class="quiz-vis-sub">7 random questions · 20-question bank · options shuffle each round</div></div>
+            <div style="font-size:10px;color:var(--pbi-muted);">Round <span id="round-num">1</span></div>
+          </div>
+          <div class="quiz-vis-body">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--pbi-muted);margin-bottom:4px;">
+              <span>Q <span id="quiz-q-num">1</span>/7</span>
+              <span>Score: <span id="quiz-score">0</span>/7</span>
+            </div>
+            <div class="quiz-progress-outer"><div class="quiz-progress-inner" id="qprog" style="width:0%"></div></div>
+            <div id="quiz-card">
+              <div class="quiz-question" id="quiz-question">Loading...</div>
+              <div class="quiz-opts" id="quiz-opts"></div>
+              <div class="quiz-feedback" id="quiz-feedback"></div>
+            </div>
+            <div id="quiz-result-panel" class="quiz-result-panel">
+              <div class="quiz-result-score" id="res-score">0/7</div>
+              <div class="quiz-result-label">Final Score</div>
+              <div class="badge-row" id="badge-row"></div>
+              <div class="quiz-result-msg" id="res-msg"></div>
+              <div class="round-note" id="round-note"></div>
+              <button id="quiz-restart-btn" onclick="restartQuiz()">▶ New Round</button>
+            </div>
+          </div>
+          <div class="quiz-footer">
+            <div class="quiz-hint-txt" id="quiz-hint">Hint: —</div>
+            <button id="quiz-next-btn" onclick="nextQ()">Next ▶</button>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <div class="chart-header"><div><div class="chart-title">Why Quiz Yourself?</div><div class="chart-subtitle">Tips for getting the best score</div></div></div>
+          <div class="chart-body" style="font-size:12px;color:var(--pbi-muted);line-height:1.9;">
+            <p>📊 All answers are hidden in the report pages to the left. Navigate each page before attempting.</p>
+            <p style="margin-top:8px;">🔄 Every round draws <strong style="color:var(--pbi-text);">7 random questions</strong> from a bank of <strong style="color:var(--pbi-text);">20</strong> — and the answer options shuffle too, so muscle memory won't help!</p>
+            <p style="margin-top:8px;">✅ Each correct answer reveals a <strong style="color:var(--pbi-text);">fun fact</strong> about Sairam with extra context.</p>
+            <p style="margin-top:8px;">🏆 Aim for <strong style="color:var(--pbi-green);">Distinction</strong> — that means reading every single visual in this report.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: EXCEL VIEW ══ -->
+    <div class="pbi-page" id="page-excel">
+      <div style="background:#217346;padding:0;margin:-16px -16px 0;">
+        <div class="xl-ribbon">
+          <div class="xl-ribbon-tab active">File</div>
+          <div class="xl-ribbon-tab">Home</div>
+          <div class="xl-ribbon-tab">Insert</div>
+          <div class="xl-ribbon-tab">Formulas</div>
+          <div class="xl-ribbon-tab">Data</div>
+          <div class="xl-ribbon-tab">Review</div>
+          <div class="xl-ribbon-tab">View</div>
+        </div>
+      </div>
+      <div class="xl-formula-bar">
+        <div class="xl-cell-ref" id="xl-cell-ref">A1</div>
+        <div class="xl-fx">fx</div>
+        <input class="xl-formula-input" id="xl-formula-input" value="Sairam_Portfolio_Data.xlsx" readonly>
+      </div>
+      <div id="xl-sheet-container" style="height:calc(100vh - 200px);overflow:auto;background:#fff;">
+        <table id="xl-table" style="border-collapse:collapse;min-width:900px;">
+          <thead>
+            <tr>
+              <td class="xl-row-num"></td>
+              <td class="xl-col-hdr">A</td>
+              <td class="xl-col-hdr">B</td>
+              <td class="xl-col-hdr">C</td>
+              <td class="xl-col-hdr narrow">D</td>
+              <td class="xl-col-hdr narrow">E</td>
+              <td class="xl-col-hdr narrow">F</td>
+              <td class="xl-col-hdr narrow">G</td>
+            </tr>
+          </thead>
+          <tbody id="xl-body"></tbody>
+        </table>
+      </div>
+      <div class="xl-tabs-bar">
+        <div class="xl-sheet-tab active" onclick="xlSwitchSheet('profile',this)">👤 Profile</div>
+        <div class="xl-sheet-tab" onclick="xlSwitchSheet('projects',this)">📁 Projects</div>
+        <div class="xl-sheet-tab" onclick="xlSwitchSheet('skills',this)">💡 Skills</div>
+        <div class="xl-sheet-tab" onclick="xlSwitchSheet('certs',this)">🏅 Certs</div>
+        <div class="xl-sheet-tab" onclick="xlSwitchSheet('edu',this)">🎓 Education</div>
+      </div>
+    </div>
+
+  </div><!-- /canvas -->
+</div><!-- /main -->
+
+<!-- PAGE TABS -->
+<div id="pbi-page-tabs">
+  <div class="page-tab active" onclick="switchPage('overview',null,this)"><span class="page-tab-icon">📊</span>Overview</div>
+  <div class="page-tab" onclick="switchPage('projects',null,this)"><span class="page-tab-icon">📁</span>Projects</div>
+  <div class="page-tab" onclick="switchPage('skills',null,this)"><span class="page-tab-icon">💡</span>Skills Matrix</div>
+  <div class="page-tab" onclick="switchPage('timeline',null,this)"><span class="page-tab-icon">📅</span>Timeline</div>
+  <div class="page-tab" onclick="switchPage('certs',null,this)"><span class="page-tab-icon">🏅</span>Certs</div>
+  <div class="page-tab" onclick="switchPage('quiz',null,this)"><span class="page-tab-icon">📝</span>Quiz Me!</div>
+  <div class="page-tab" onclick="switchPage('excel',null,this)"><span class="page-tab-icon">🟢</span>Excel View</div>
+</div>
+
+<script>
+/* ─ PAGE SWITCHING ─ */
+function switchPage(name, navEl, tabEl){
+  document.querySelectorAll('.pbi-page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  else{
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      if(n.textContent.trim().toLowerCase().includes(name.replace('-',' '))) n.classList.add('active');
+    });
+  }
+  if(tabEl) tabEl.classList.add('active');
+  else{
+    const tabs=document.querySelectorAll('.page-tab');
+    tabs.forEach(t=>{if(t.textContent.toLowerCase().includes(name.replace('-',' '))) t.classList.add('active');});
+  }
+  if(name==='excel') buildSheet('profile');
+}
+
+/* ─ SLICER CHIPS ─ */
+function setChip(el){
+  el.closest('.slicer-bar').querySelectorAll('.slicer-chip').forEach(c=>{
+    if(c.closest('.slicer-label')==null && c.previousElementSibling?.classList.contains('slicer-divider') === el.previousElementSibling?.classList.contains('slicer-divider')){}
+  });
+  el.classList.toggle('active');
+}
+
+/* ─ SKILLS ROW SELECT ─ */
+function selectRow(el){
+  el.closest('.listview').querySelectorAll('.lv-row').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+/* ─ EXCEL SHEETS DATA ─ */
+const XL_SHEETS={
+  profile:{
+    headers:['Field','Value','','','','',''],
+    rows:[
+      ['header','PERSONAL PROFILE — A. SAIRAM PATRO','','','','',''],
+      ['','Full Name','A. Sairam Patro','','','',''],
+      ['alt','Email','sairam.patro000@gmail.com','','','',''],
+      ['','Mobile','+91 8260979884','','','',''],
+      ['alt','GitHub','github.com/Sairam-Patro','','','',''],
+      ['','LinkedIn','linkedin.com/in/sairam-patro/','','','',''],
+      ['alt','University','Lovely Professional University','','','',''],
+      ['','Degree','B.Tech CSE','','','',''],
+      ['alt','CGPA','8.27','','','',''],
+      ['','Hometown','Berhampur, Odisha','','','',''],
+      ['alt','LeetCode Solved','300+','','','',''],
+      ['','NPTEL Rank','Elite (12,697 participants)','','','',''],
+      ['alt','Training','140+ hours @ ByteXL','','','',''],
+    ]
+  },
+  projects:{
+    headers:['Project Name','Domain','Date','Tech Stack','Status','Complexity','Score'],
+    rows:[
+      ['header','PROJECTS DATA','','','','',''],
+      ['','Tuber Service Analytics Dashboard','Data Analytics','Oct 2025','Power BI, DAX, Power Query','Complete','High','4.5'],
+      ['alt','Stress Relief Chatbot','AI / Web','Apr 2025','HTML, CSS, JS, Gemini API','Complete','Medium','4.0'],
+      ['','CPU Scheduler Simulator','Systems','Mar 2025','HTML, CSS, JavaScript','Complete','High','4.2'],
+      ['alt','Air Quality Analysis Dashboard','Analytics','Mar 2025','Excel, Pivot Tables, Charts','Complete','Medium','3.8'],
+      ['','Library Management System','C++ / OOP','Mar 2025','C++, STL, Hashing, OOP','Complete','High','4.3'],
+    ]
+  },
+  skills:{
+    headers:['Category','Skill','Level','Score','Projects Used','Cert?','Priority'],
+    rows:[
+      ['header','SKILLS INVENTORY','','','','',''],
+      ['','Languages','C++','Expert','4.4/5','2','High'],
+      ['alt','Languages','Python','Intermediate','3.5/5','1','Medium'],
+      ['','Languages','Java','Intermediate','3.3/5','0','Medium'],
+      ['alt','Languages','C','Proficient','3.8/5','1','High'],
+      ['','Data & Viz','Power BI','Proficient','4.2/5','1','High'],
+      ['alt','Data & Viz','DAX','Proficient','3.9/5','1','High'],
+      ['','Data & Viz','Power Query','Proficient','3.9/5','1','High'],
+      ['alt','Data & Viz','Excel','Proficient','3.7/5','1','High'],
+      ['','Web','HTML/CSS','Intermediate','3.5/5','3','Medium'],
+      ['alt','Web','JavaScript','Intermediate','3.5/5','3','Medium'],
+      ['','Tools','Git/GitHub','Proficient','3.8/5','5','High'],
+      ['alt','Tools','MySQL','Learning','3.0/5','0','Low'],
+    ]
+  },
+  certs:{
+    headers:['#','Certificate','Issuer','Date','Domain','Status','Score'],
+    rows:[
+      ['header','CERTIFICATIONS RECORD','','','','',''],
+      ['','001','Computational Theory & Finite Automata','Infosys Springboard','Aug 2025','CS Theory','Verified','A+'],
+      ['alt','002','Master Generative AI & AI Tools','Infosys','Aug 2025','AI / ML','Verified','A'],
+      ['','003','Build GenAI Apps No-Code','Infosys','Aug 2025','AI / ML','Verified','A'],
+      ['alt','004','Privacy & Security in Social Media','NPTEL','May 2025','Security','ELITE','S'],
+      ['','005','Mastering in C: Basics to Beyond','CSE Pathshala','Mar 2025','Programming','Verified','A'],
+    ]
+  },
+  edu:{
+    headers:['Institution','Degree','Location','Period','Score','Grade','Rank'],
+    rows:[
+      ['header','ACADEMIC TRANSCRIPT','','','','',''],
+      ['','Lovely Professional University','B.Tech CSE','Phagwara, Punjab','Aug 2023–Present','8.27 CGPA','A','—'],
+      ['alt','Mount Litera Zee School','12th Science','Berhampur, Odisha','2021–2023','75.6%','B+','—'],
+      ['','St. Xavier\'s High School','10th CBSE','Berhampur, Odisha','2020–2021','81.4%','A','—'],
+    ]
+  }
+};
+
+let currentSheet='profile';
+function buildSheet(name){
+  currentSheet=name;
+  const d=XL_SHEETS[name];
+  const tbody=document.getElementById('xl-body');
+  tbody.innerHTML='';
+  // header row
+  const htr=document.createElement('tr');
+  htr.innerHTML='<td class="xl-row-num">1</td>';
+  d.headers.forEach((h,i)=>{
+    const cls=i>=4?'narrow':'';
+    htr.innerHTML+=`<td class="xl-cell ${cls} bold center">${h}</td>`;
+  });
+  tbody.appendChild(htr);
+  d.rows.forEach((row,ri)=>{
+    const tr=document.createElement('tr');
+    const isAlt=row[0]==='alt';
+    const isHead=row[0]==='header';
+    const data=row.slice(isHead||isAlt?1:1);
+    tr.innerHTML=`<td class="xl-row-num">${ri+2}</td>`;
+    data.forEach((cell,ci)=>{
+      const cls=(ci>=4?'narrow ':'')+
+                (isHead?'header-row ':'')+ 
+                (isAlt&&!isHead?'alt-row ':'');
+      let extra='';
+      if(cell==='Verified'||cell==='Complete'||cell==='ELITE') extra='green-txt';
+      if(cell==='High') extra='blue-txt';
+      if(!isNaN(cell)&&cell!=='') extra='right';
+      tr.innerHTML+=`<td class="xl-cell ${cls} ${extra}" onclick="xlSelectCell(this,'${String.fromCharCode(65+ci)}${ri+2}')">${cell}</td>`;
+    });
+    tbody.appendChild(tr);
+  });
+}
+function xlSwitchSheet(name,el){
+  document.querySelectorAll('.xl-sheet-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  buildSheet(name);
+}
+function xlSelectCell(el,ref){
+  document.querySelectorAll('.xl-cell.selected').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('xl-cell-ref').textContent=ref;
+  document.getElementById('xl-formula-input').value=el.textContent||'';
+}
+
+/* ─ QUIZ ─ */
+const BANK=[
+  {q:"What is Sairam's current CGPA at LPU?",opts:["7.85","8.27","8.54","9.01"],ans:1,fb:"8.27 CGPA — see the Education page or Overview KPI card.",hint:"📊 Overview page → KPI card"},
+  {q:"Which API powers Sairam's Stress Relief Chatbot?",opts:["OpenAI GPT-4","Claude API","Gemini API","HuggingFace"],ans:2,fb:"Gemini API — Google's AI for context-aware mental wellness responses.",hint:"📁 Projects page"},
+  {q:"How many training hours at ByteXL?",opts:["80+","100+","120+","140+"],ans:3,fb:"140+ hours of intensive competitive programming — see Timeline page.",hint:"📅 Timeline page"},
+  {q:"How many participants in NPTEL Elite Award?",opts:["5,200","8,400","12,697","20,000+"],ans:2,fb:"12,697 nationwide — Sairam ranked Elite among all of them.",hint:"📊 Overview → KPI card"},
+  {q:"Which BI tool for the Tuber Dashboard?",opts:["Tableau","Matplotlib","Microsoft Power BI","Data Studio"],ans:2,fb:"Microsoft Power BI with Power Query + DAX — see Projects page.",hint:"📁 Projects page"},
+  {q:"Where is Sairam originally from?",opts:["Phagwara, Punjab","Bhubaneswar, Odisha","Berhampur, Odisha","Raipur, CG"],ans:2,fb:"Berhampur, Odisha — see Profile sheet in Excel View or Overview.",hint:"🟢 Excel View → Profile"},
+  {q:"Which data structure for Library System lookups?",opts:["BST","Hashing","Linear Search","AVL Tree"],ans:1,fb:"Hashing — O(1) average time for book/member lookup in C++.",hint:"📁 Projects page"},
+  {q:"How many LeetCode problems solved?",opts:["100+","200+","300+","500+"],ans:2,fb:"300+ problems — achieved Nov 2025. See Overview KPI card.",hint:"📊 Overview page"},
+  {q:"CPU Simulator scheduling algorithms?",opts:["FCFS & RR only","FCFS,SJF,SRTF,Priority,RR","SJF,SRTF,Priority","All POSIX"],ans:1,fb:"5 algorithms: FCFS, SJF, SRTF, Priority, Round Robin with Gantt charts.",hint:"📁 Projects page"},
+  {q:"Which year did Sairam join LPU?",opts:["2021","2022","2023","2024"],ans:2,fb:"August 2023 — enrolled at Lovely Professional University, Punjab.",hint:"🎓 Excel View → Education"},
+  {q:"Language used in Mastering in C training?",opts:["C++","Java","C","Python"],ans:2,fb:"C — fundamentals: variables, loops, pointers, recursion, modular programming.",hint:"📅 Timeline page"},
+  {q:"STL containers in Library System?",opts:["map & set","vector & list","queue & stack","deque & array"],ans:1,fb:"vector and list — paired with hashing for efficient storage.",hint:"📁 Projects page"},
+  {q:"Which org issued Finite Automata cert?",opts:["NPTEL","Coursera","Infosys Springboard","ByteXL"],ans:2,fb:"Infosys Springboard — Computational Theory & Finite Automata.",hint:"🏅 Certs page"},
+  {q:"Sairam's 10th percentage?",opts:["75.6%","78.2%","81.4%","85.0%"],ans:2,fb:"81.4% at St. Xavier's High School, Berhampur, Mar 2021.",hint:"🎓 Excel → Education sheet"},
+  {q:"Training platform for DSA course?",opts:["Coursera","ByteXL","NPTEL","Udemy"],ans:1,fb:"ByteXL — 140+ hours industry-oriented competitive programming.",hint:"📅 Timeline page"},
+  {q:"Air Quality Dashboard analyzes what?",opts:["Temp & humidity","Pollutants & health indicators","Rainfall & wind","UV & ozone"],ans:1,fb:"Pollutant levels and health indicators across NYC boroughs.",hint:"📁 Projects page"},
+  {q:"How many Infosys certs does Sairam hold?",opts:["1","2","3","4"],ans:2,fb:"3 Infosys certs — all earned Aug 2025. See Certs page table.",hint:"🏅 Certs page"},
+  {q:"Visualization type in CPU Simulator?",opts:["Pie charts","Bar graphs","Gantt charts","Network diagrams"],ans:2,fb:"Gantt charts — showing process execution and timing visually.",hint:"📁 Projects page"},
+  {q:"12th school name?",opts:["St. Xavier's","Delhi Public","Mount Litera Zee School","Kendriya Vidyalaya"],ans:2,fb:"Mount Litera Zee School, Berhampur, Odisha — 75.6% in Science.",hint:"🎓 Excel → Education sheet"},
+  {q:"What does the Air Quality Dashboard use for region filtering?",opts:["Conditional formatting","Pivot Slicers","SQL queries","Drop-down macros"],ans:1,fb:"Pivot Slicers — dynamic region-wise filters in Excel for boroughs and areas.",hint:"📁 Projects page"}
+];
+const QPR=7;let cur=0,score=0,answered=false,active=[],roundNum=1,lastPicked=[];
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+function pickQ(){
+  const sh=shuffle(BANK.map((_,i)=>i));
+  let ch=[];
+  for(let i=0;i<sh.length&&ch.length<QPR;i++) if(!lastPicked.includes(sh[i]))ch.push(sh[i]);
+  if(ch.length<QPR) for(let i=0;i<sh.length&&ch.length<QPR;i++) if(!ch.includes(sh[i]))ch.push(sh[i]);
+  lastPicked=ch;return ch.map(i=>BANK[i]);
+}
+function renderQ(){
+  document.getElementById('quiz-card').style.display='block';
+  document.getElementById('quiz-result-panel').style.display='none';
+  const q=active[cur];
+  document.getElementById('quiz-q-num').textContent=cur+1;
+  document.getElementById('quiz-score').textContent=score;
+  document.getElementById('qprog').style.width=((cur/active.length)*100)+'%';
+  document.getElementById('quiz-question').textContent=q.q;
+  document.getElementById('quiz-feedback').style.display='none';
+  document.getElementById('quiz-next-btn').style.display='none';
+  document.getElementById('quiz-hint').textContent='Hint: '+q.hint;
+  answered=false;
+  const ct=q.opts[q.ans],sh=shuffle(q.opts),ai=sh.indexOf(ct);
+  const el=document.getElementById('quiz-opts');el.innerHTML='';
+  ['A','B','C','D'].forEach((k,i)=>{
+    const b=document.createElement('div');b.className='qopt';
+    b.innerHTML=`<span class="qopt-key">${k}</span>${sh[i]}`;
+    b.onclick=()=>pick(i,ai,b);el.appendChild(b);
+  });
+}
+function pick(idx,ai,el){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.qopt').forEach(o=>o.classList.add('disabled'));
+  if(idx===ai){score++;el.classList.add('correct');}else{el.classList.add('wrong');document.querySelectorAll('.qopt')[ai].classList.add('correct');}
+  document.getElementById('quiz-score').textContent=score;
+  const fb=document.getElementById('quiz-feedback');
+  fb.innerHTML=(idx===ai?'✅ Correct — ':'❌ Not quite — ')+active[cur].fb;
+  fb.style.display='block';
+  const nb=document.getElementById('quiz-next-btn');nb.style.display='inline-block';
+  nb.textContent=cur<active.length-1?'Next ▶':'Results ▶';
+}
+function nextQ(){cur++;if(cur>=active.length){showResults();return;}renderQ();}
+function showResults(){
+  document.getElementById('quiz-card').style.display='none';
+  document.getElementById('quiz-result-panel').style.display='block';
+  document.getElementById('qprog').style.width='100%';
+  document.getElementById('res-score').textContent=score+'/'+active.length;
+  const p=score/active.length;
+  let m,badges;
+  if(p>=1){m="<strong>Distinction!</strong> Perfect score — you read every visual in this report. Sairam would be impressed!";badges=[{t:'100% Score',e:true},{t:'Eagle Eye',e:true},{t:'Master Analyst',e:true}];}
+  else if(p>=.7){m="<strong>First Class!</strong> Great work — most of the data absorbed. Try a new round for different questions!";badges=[{t:'70%+ Score',e:true},{t:'Eagle Eye',e:true},{t:'Master Analyst',e:false}];}
+  else if(p>=.4){m="<strong>Pass.</strong> Some KPIs missed. Navigate each report page carefully, then retry!";badges=[{t:'70%+ Score',e:false},{t:'Eagle Eye',e:false},{t:'Master Analyst',e:false}];}
+  else{m="<strong>The answers are all in the report pages!</strong> Try the Overview, Projects, Timeline, and Certs pages before retrying.";badges=[{t:'70%+ Score',e:false},{t:'Eagle Eye',e:false},{t:'Master Analyst',e:false}];}
+  document.getElementById('res-msg').innerHTML=m;
+  document.getElementById('round-note').textContent='Round '+roundNum+' complete · 20 questions in bank · shuffled every round';
+  document.getElementById('badge-row').innerHTML=badges.map(b=>`<div class="badge${b.e?' earned':''}">${b.t}</div>`).join('');
+}
+function restartQuiz(){
+  cur=0;score=0;answered=false;roundNum++;
+  active=pickQ();
+  document.getElementById('round-num').textContent=roundNum;
+  renderQ();
+}
+active=pickQ();renderQ();
+buildSheet('profile');
+</script>
+</body>
+</html>
